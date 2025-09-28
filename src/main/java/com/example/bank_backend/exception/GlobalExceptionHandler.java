@@ -86,6 +86,28 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
+    @ExceptionHandler(CannotDeleteClientException.class)
+    public ResponseEntity<ApiError> handleCannotDeleteClient(CannotDeleteClientException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Невозможно удалить клиента, есть незакрытые депозиты",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(CannotDeleteBankException.class)
+    public ResponseEntity<ApiError> handleCannotDeleteBank(CannotDeleteBankException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Невозможно удалить ресурс",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
         String errorMessage = "Некорректный формат JSON тела запроса";
@@ -153,6 +175,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BankNotFoundException.class)
     public ResponseEntity<ApiError> handleBankNotFound(BankNotFoundException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.NOT_FOUND.value(),
+                "Ресурс не найден",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(NoDepositsFoundException.class)
+    public ResponseEntity<ApiError> handleNoDepositsFound(NoDepositsFoundException ex, WebRequest request) {
         ApiError error = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 "Ресурс не найден",
