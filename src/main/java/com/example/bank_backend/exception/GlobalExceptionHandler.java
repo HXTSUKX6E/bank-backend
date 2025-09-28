@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -76,7 +77,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ClientAlreadyExistsException.class)
-    public ResponseEntity<ApiError> handleClientAlreadyExists(BankAlreadyExistsException ex, WebRequest request) {
+    public ResponseEntity<ApiError> handleClientAlreadyExists(ClientAlreadyExistsException ex, WebRequest request) {
         ApiError error = new ApiError(
                 HttpStatus.CONFLICT.value(),
                 "Клиент с таким именен уже существует",
@@ -190,6 +191,17 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 "Ресурс не найден",
                 ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<ApiError> handleNotFound(NoHandlerFoundException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.NOT_FOUND.value(),
+                "Ресурс не найден",
+                "Ресурс не существует: " + ex.getRequestURL(),
                 request.getDescription(false).replace("uri=", "")
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
