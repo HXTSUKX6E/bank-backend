@@ -26,15 +26,17 @@ public class ClientController {
     // Получить всех клиентов (поиск + фильтрация)
     @GetMapping
     public List<Client> getAllClients(@RequestParam(required = false) String name,
+            @RequestParam(required = false) String shortName,
+            @RequestParam(required = false) String address,
             @RequestParam(required = false) LegalForm legalForm,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String direction
     ) {
-       List<Client> clients= clientService.findAllClients(name, legalForm, sortBy, direction);
+        List<Client> clients = clientService.findAllClients(name, shortName, address, legalForm, sortBy, direction);
         if (clients.isEmpty()) {
             throw new NoClientsFoundException("Клиенты с указанными критериями не найдены");
         }
-       return clients;
+        return clients;
     }
 
     // Получить клиента по ID
