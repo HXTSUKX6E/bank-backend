@@ -63,6 +63,8 @@ public class ClientController {
         try {
             clientService.deleteClient(id);
             return ResponseEntity.noContent().build();
+        } catch (IllegalStateException e) { // клиент с депозитами
+            return ResponseEntity.badRequest().build();
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
         }
