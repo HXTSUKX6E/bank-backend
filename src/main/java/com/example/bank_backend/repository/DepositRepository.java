@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface DepositRepository extends JpaRepository<Deposit, Long>, JpaSpecificationExecutor<Deposit> {
     boolean existsByClientId(Long id);
 
-    long countByClientId(Long clientId);
+    boolean existsByBankId(Long attr0);
 }
