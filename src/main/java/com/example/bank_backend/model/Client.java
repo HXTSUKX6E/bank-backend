@@ -17,7 +17,7 @@ public class Client {
 
     @NotBlank(message = "Наименование клиента обязательно")
     @Size(max = 255, message = "Наименование клиента не может быть длиннее 255 символов")
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Size(max = 100, message = "Краткое наименование не может быть длиннее 100 символов")
