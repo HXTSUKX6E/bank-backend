@@ -23,11 +23,13 @@ public class ClientService {
         this.clientRepository = clientRepository;
     }
 
-    public List<Client> findAllClients(String name, LegalForm legalForm, String sortBy, String direction) {
+    public List<Client> findAllClients(String name, String shortName, String address, LegalForm legalForm, String sortBy, String direction) {
         Sort sort = direction.equalsIgnoreCase("desc") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
 
         List<Client> clients = clientRepository.findAll(sort).stream()
                 .filter(c -> (name == null || c.getName().toLowerCase().contains(name.toLowerCase())))
+                .filter(c -> (shortName == null || c.getShortName().toLowerCase().contains(shortName.toLowerCase())))
+                .filter(c -> (address == null || c.getAddress().toLowerCase().contains(address.toLowerCase())))
                 .filter(c -> (legalForm == null || c.getLegalForm() == legalForm))
                 .toList();
 
