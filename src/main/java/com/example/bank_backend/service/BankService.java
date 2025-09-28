@@ -63,13 +63,10 @@ public class BankService {
     public void deleteBank(Long bakId) {
         Bank bank = findBankById(bakId);
 
-        boolean hasDeposits = depositRepository.existsByClientId(bakId);
+        boolean hasDeposits = depositRepository.existsByBankId(bakId);
 
         if (hasDeposits) {
-            throw new CannotDeleteBankException(
-                    "Невозможно удалить банк. У банка кол-во депозитов: " +
-                            depositRepository.countByClientId(bakId) + "."
-            );
+            throw new IllegalStateException("Нельзя удалить банк с депозитами");
         }
 
         bankRepository.delete(bank);

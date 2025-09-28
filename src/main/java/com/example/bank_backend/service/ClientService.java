@@ -74,10 +74,7 @@ public class ClientService {
         boolean hasDeposits = depositRepository.existsByClientId(clientId);
 
         if (hasDeposits) {
-            throw new CannotDeleteClientException(
-                    "Невозможно удалить клиента. Количество активных депозитов: " +
-                            depositRepository.countByClientId(clientId) + "."
-            );
+            throw new IllegalStateException("Нельзя удалить клиента с депозитами");
         }
         clientRepository.delete(client);
     }
