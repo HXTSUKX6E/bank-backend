@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Обработчик для ошибок JSON десериализации (enum и др.)
+    // Обработчик для ошибок JSON десериализации
     @ExceptionHandler(InvalidFormatException.class)
     public ResponseEntity<ApiError> handleInvalidFormatException(InvalidFormatException ex, WebRequest request) {
         String errorMessage = "Некорректный формат данных";
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NoClientsFoundException.class)
     public ResponseEntity<ApiError> handleNoClients(NoClientsFoundException ex, WebRequest request) {
         ApiError error = new ApiError(
-                HttpStatus.NOT_FOUND.value(),  // Важно: 404, а не 500
+                HttpStatus.NOT_FOUND.value(),
                 "Ресурс не найден",
                 ex.getMessage(),
                 request.getDescription(false).replace("uri=", "")
@@ -53,12 +53,43 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
-    // Обработчик для общего случая нечитаемого сообщения
+    @ExceptionHandler(NoBanksFoundException.class)
+    public ResponseEntity<ApiError> handleNoBanks(NoBanksFoundException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.NOT_FOUND.value(),
+                "Ресурс не найден",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(BankAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleBankAlreadyExists(BankAlreadyExistsException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Банк с таким именем или БИК уже зарегестрирован",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(ClientAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleClientAlreadyExists(BankAlreadyExistsException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.CONFLICT.value(),
+                "Клиент с таким именен уже существует",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, WebRequest request) {
         String errorMessage = "Некорректный формат JSON тела запроса";
 
-        // Если вложенное исключение - InvalidFormatException, делегируем его обработчику
         if (ex.getCause() instanceof InvalidFormatException) {
             return handleInvalidFormatException((InvalidFormatException) ex.getCause(), request);
         }
@@ -111,6 +142,17 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ClientNotFoundException.class)
     public ResponseEntity<ApiError> handleClientNotFound(ClientNotFoundException ex, WebRequest request) {
+        ApiError error = new ApiError(
+                HttpStatus.NOT_FOUND.value(),
+                "Ресурс не найден",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(BankNotFoundException.class)
+    public ResponseEntity<ApiError> handleBankNotFound(BankNotFoundException ex, WebRequest request) {
         ApiError error = new ApiError(
                 HttpStatus.NOT_FOUND.value(),
                 "Ресурс не найден",
