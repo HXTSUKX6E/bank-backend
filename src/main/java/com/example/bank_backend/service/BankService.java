@@ -1,10 +1,9 @@
 package com.example.bank_backend.service;
 
-import com.example.bank_backend.exception.BankAlreadyExistsException;
-import com.example.bank_backend.exception.BankNotFoundException;
-import com.example.bank_backend.exception.NoBanksFoundException;
+import com.example.bank_backend.exception.*;
 import com.example.bank_backend.model.Bank;
 import com.example.bank_backend.repository.BankRepository;
+import com.example.bank_backend.repository.DepositRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -15,10 +14,12 @@ import java.util.List;
 public class BankService {
 
     private final BankRepository bankRepository;
+    private final DepositRepository depositRepository;
 
     @Autowired
-    public BankService(BankRepository bankRepository) {
+    public BankService(BankRepository bankRepository, DepositRepository depositRepository) {
         this.bankRepository = bankRepository;
+        this.depositRepository = depositRepository;
     }
 
     public List<Bank> findAllBanks(String name, String bik, String sortBy, String direction) {
@@ -59,9 +60,18 @@ public class BankService {
         return bankRepository.save(bank);
     }
 
-    public void deleteBank(Long id) {
-        Bank bank = bankRepository.findById(id)
-                .orElseThrow(() -> new BankNotFoundException("Банк с ID: " + id + " не найден."));
+    public void deleteBank(Long bakId) {
+        Bank bank = findBankById(bakId);
+
+        boolean hasDeposits = depositRepository.existsByClientId(bakId);
+
+        if (hasDeposits) {
+            throw new CannotDeleteBankException(
+                    "Невозможно удалить банк. У банка кол-во депозитов: " +
+                            depositRepository.countByClientId(bakId) + "."
+            );
+        }
+
         bankRepository.delete(bank);
     }
 }

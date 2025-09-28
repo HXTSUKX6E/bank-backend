@@ -1,11 +1,13 @@
 package com.example.bank_backend.service;
 
+import com.example.bank_backend.exception.CannotDeleteClientException;
 import com.example.bank_backend.exception.ClientAlreadyExistsException;
 import com.example.bank_backend.exception.ClientNotFoundException;
 import com.example.bank_backend.exception.NoClientsFoundException;
 import com.example.bank_backend.model.Client;
 import com.example.bank_backend.model.LegalForm;
 import com.example.bank_backend.repository.ClientRepository;
+import com.example.bank_backend.repository.DepositRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -17,10 +19,12 @@ import java.util.Optional;
 public class ClientService {
 
     private final ClientRepository clientRepository;
+    private final DepositRepository depositRepository;
 
     @Autowired
-    public ClientService(ClientRepository clientRepository) {
+    public ClientService(ClientRepository clientRepository, DepositRepository depositRepository) {
         this.clientRepository = clientRepository;
+        this.depositRepository = depositRepository;
     }
 
     public List<Client> findAllClients(String name, String shortName, String address, LegalForm legalForm, String sortBy, String direction) {
@@ -63,8 +67,18 @@ public class ClientService {
         return clientRepository.save(client);
     }
 
-    public void deleteClient(Long id) {
-        Client client = findClientById(id);
+    public void deleteClient(Long clientId) {
+
+        Client client = findClientById(clientId);
+
+        boolean hasDeposits = depositRepository.existsByClientId(clientId);
+
+        if (hasDeposits) {
+            throw new CannotDeleteClientException(
+                    "Невозможно удалить клиента. Количество активных депозитов: " +
+                            depositRepository.countByClientId(clientId) + "."
+            );
+        }
         clientRepository.delete(client);
     }
 
