@@ -38,7 +38,7 @@ public class BankController {
 
     // Получить банк по ID
     @GetMapping("/{id}")
-    public Bank getClientById(@PathVariable Long id) {
+    public Bank getBankById(@PathVariable Long id) {
         return bankService.findBankById(id);
     }
 
