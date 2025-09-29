@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: bank_postgres
+    environment:
+      POSTGRES_DB: bank_db
+      POSTGRES_USER: bank_user
+      POSTGRES_PASSWORD: bank_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bank_network
+
+  app:
+    build: .
+    container_name: bank_app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bank_db
+      SPRING_DATASOURCE_USERNAME: bank_user
+      SPRING_DATASOURCE_PASSWORD: bank_password
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - bank_network
+
+volumes:
+  postgres_data:
+
+networks:
+  bank_network:
+    driver: bridge
